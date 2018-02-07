@@ -27,6 +27,25 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
     @Override
     public void register(View view) {
         super.register(view);
+        loadArticles(view);
+    }
+
+    void loadArticles(View view) {
+        addToUnsubscribe(view.onRefreshAction()
+                .doOnNext(ignored -> view.showRefreshing(true))
+                .switchMapSingle(ignored -> articlesRepository.latestFintechArticles().subscribeOn(ioScheduler))
+                .observeOn(uiScheduler)
+                .subscribe(
+                        articles -> {
+                            Log.i(TAG, "Subscribe articles");
+                            view.showRefreshing(false);
+                            view.displayArticles(articles);
+                            view.onArticleClicked();},
+                        error -> {
+                            Log.e(TAG,"Error subscribe" + error);
+                            view.displayMessage("An error occurs while loading the data, please try again.");
+                            view.showRefreshing(false);}));
+
     }
 
     interface View extends BasePresenterView {

@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -42,8 +43,9 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
 
     @Override
     public void displayArticles(List<Article> articles) {
+        adapter.showArticles(articles);
+        adapter.notifyDataSetChanged();
     }
-
 
     @Override
     public void displayMessage(String errorMessage) {

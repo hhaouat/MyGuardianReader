@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 
+import com.myguardianreader.HeadlinesApp;
 import com.myguardianreader.R;
 
 import butterknife.BindView;
@@ -27,6 +28,7 @@ public class ArticlesActivity extends AppCompatActivity {
     SwipeRefreshLayout swipeRefreshLayout;
 
     private ArticlesDisplayer articlesDisplayer;
+    private ArticlesPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,16 +41,19 @@ public class ArticlesActivity extends AppCompatActivity {
         articlesDisplayer = new ArticlesDisplayer(this, recyclerView,
                 swipeRefreshLayout,
                 toolbar);
+        presenter = HeadlinesApp.from(getApplicationContext()).inject(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        presenter.register(articlesDisplayer);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        presenter.unregister();
     }
 
     @Override

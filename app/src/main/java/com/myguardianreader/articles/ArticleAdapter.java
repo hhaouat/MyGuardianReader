@@ -9,12 +9,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.myguardianreader.R;
+import com.myguardianreader.common.GlideCircleTransformation;
 import com.reader.android.articles.model.Article;
 import com.reader.android.articles.model.Header;
 import com.reader.android.articles.model.Item;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,7 +47,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
+        ((ArticleViewHolder) holder).bind((Article)articles.get(position));
     }
 
     @Override
@@ -50,7 +55,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return articles.size();
     }
 
-    void showArticles(List<Item> articles) {
+    void showArticles(List<Article> articles) {
         this.articles.clear();
         this.articles.addAll(articles);
         notifyDataSetChanged();
@@ -71,6 +76,19 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         ArticleViewHolder(View view) {
             super(view);
+        }
+        void bind(Article article) {
+            ButterKnife.bind(this, itemView);
+            headlineTextView.setText(article.getTitle());
+            Glide.with(context)
+                    .load(article.getThumbnail())
+                    .bitmapTransform(new GlideCircleTransformation(context))
+                    .into(thumbnailImageView);
+
+            Date dateArticlePublished = new Date(article.getPublished());
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY");
+
+            dateTextView.setText(dateFormat.format(dateArticlePublished));
         }
     }
 
