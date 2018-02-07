@@ -26,7 +26,7 @@ public class ArticlesActivity extends AppCompatActivity {
     @BindView(R.id.articles_swiperefreshlayout)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    private ArticlesPresenter presenter;
+    private ArticlesDisplayer articlesDisplayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,10 @@ public class ArticlesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_article_list);
 
         ButterKnife.bind(this);
-
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        articlesDisplayer = new ArticlesDisplayer(this, recyclerView,
+                swipeRefreshLayout,
+                toolbar);
     }
 
     @Override
