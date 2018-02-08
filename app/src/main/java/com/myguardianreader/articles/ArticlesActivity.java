@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.myguardianreader.HeadlinesApp;
 import com.myguardianreader.R;
+import com.myguardianreader.articles.favorite.DbFavorites;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +30,7 @@ public class ArticlesActivity extends AppCompatActivity {
 
     private ArticlesDisplayer articlesDisplayer;
     private ArticlesPresenter presenter;
+    private DbFavorites dbFavorites;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,11 @@ public class ArticlesActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        dbFavorites = new DbFavorites(this);
         articlesDisplayer = new ArticlesDisplayer(this, recyclerView,
                 swipeRefreshLayout,
-                toolbar);
+                toolbar,
+                dbFavorites);
         presenter = HeadlinesApp.from(getApplicationContext()).inject(this);
     }
 
@@ -59,5 +63,6 @@ public class ArticlesActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        dbFavorites.closeConnection();
     }
 }

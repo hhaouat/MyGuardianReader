@@ -3,6 +3,7 @@ package com.myguardianreader.articles;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.myguardianreader.R;
 import com.myguardianreader.common.GlideCircleTransformation;
 import com.reader.android.articles.model.Article;
@@ -24,6 +26,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 
 class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -42,12 +45,39 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         View view = layoutInflater.inflate(R.layout.list_item_article, parent, false);
         ArticleViewHolder articleViewHolder = new ArticleViewHolder(view);
 
+        switch (viewType){
+            case Article.ARTICLE_TYPE:
+                return articleViewHolder;
+
+            case Article.HEADER_TYPE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.header_type, parent, false);
+                return new HeaderViewHolder(view);
+        }
         return articleViewHolder;
     }
 
     @Override
+    public int getItemViewType(int position) {
+
+        if (articles.get(position) instanceof Article) {
+            return Article.ARTICLE_TYPE;
+        }else {
+            return Article.HEADER_TYPE;
+        }
+    }
+
+    @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((ArticleViewHolder) holder).bind((Article)articles.get(position));
+        Item item = articles.get(position);
+        if (item!= null) {
+            if (item instanceof Article) {
+                if (position != 0) {
+                    ((ArticleViewHolder) holder).bind((Article)articles.get(position));
+                }
+            }else{
+                ((HeaderViewHolder) holder).bind((Header)articles.get(position));
+            }
+        }
     }
 
     @Override
@@ -55,7 +85,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return articles.size();
     }
 
-    void showArticles(List<Article> articles) {
+    void showArticles(List<Item> articles) {
         this.articles.clear();
         this.articles.addAll(articles);
         notifyDataSetChanged();
