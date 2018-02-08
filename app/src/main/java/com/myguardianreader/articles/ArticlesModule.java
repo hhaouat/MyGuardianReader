@@ -9,6 +9,7 @@ import com.myguardianreader.BuildConfig;
 import com.myguardianreader.articles.model.ArticleApiMapper;
 import com.myguardianreader.articles.model.ArticleMapper;
 import com.myguardianreader.common.GuardianService;
+import com.myguardianreader.details.DetailsPresenter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -27,6 +28,11 @@ public class ArticlesModule {
 
     ArticlesPresenter inject(Context context) {
         return new ArticlesPresenter(AndroidSchedulers.mainThread(), Schedulers.io(),
+                new ArticlesRepository(createGuardianService(context), new ArticleMapper(), new ArticleApiMapper()));
+    }
+
+    public DetailsPresenter injectDetails(Context context) {
+        return new DetailsPresenter(AndroidSchedulers.mainThread(), Schedulers.io(),
                 new ArticlesRepository(createGuardianService(context), new ArticleMapper(), new ArticleApiMapper()));
     }
 

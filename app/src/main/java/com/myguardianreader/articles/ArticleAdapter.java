@@ -47,6 +47,16 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         switch (viewType){
             case Article.ARTICLE_TYPE:
+                RxView.clicks(view)
+                        .map(new Function<Object, Article>() {
+                            @Override
+                            public Article apply(Object ignored) throws Exception {
+                                Article entity = (Article) articles.get(articleViewHolder.getAdapterPosition());
+                                Log.d("RxView.clicks: ", "" + entity);
+                                return entity;
+                            }
+                        })
+                        .subscribeWith(onClickArticle);
                 return articleViewHolder;
 
             case Article.HEADER_TYPE:

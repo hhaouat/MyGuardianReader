@@ -28,6 +28,7 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
     public void register(View view) {
         super.register(view);
         loadArticles(view);
+        onArticleClicked(view);
     }
 
     void loadArticles(View view) {
@@ -48,6 +49,16 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
 
     }
 
+    private void onArticleClicked(View view) {
+        addToUnsubscribe(view.onArticleClicked()
+                .subscribe(
+                        article -> view.openArticleDetailActivity(article),
+                        error -> {
+                            Log.e(TAG,"Error onArticleClicked");
+                            view.displayMessage("An error occurs while loading the data, please try again.");}));
+
+    }
+
     interface View extends BasePresenterView {
         void showRefreshing(boolean isRefreshing);
 
@@ -58,6 +69,8 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
         Observable<Article> onArticleClicked();
 
         Observable<Object> onRefreshAction();
+
+        void openArticleDetailActivity(Article article);
 
     }
 }

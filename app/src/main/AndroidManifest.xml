@@ -19,6 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.myguardianreader.details.DetailsActivity"/>
         <provider
             android:name="com.myguardianreader.db.RequestProvider"
             android:authorities="com.reader.android"

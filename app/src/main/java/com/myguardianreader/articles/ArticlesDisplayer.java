@@ -1,5 +1,6 @@
 package com.myguardianreader.articles;
 
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -9,6 +10,7 @@ import com.myguardianreader.HeadlinesApp;
 import com.myguardianreader.articles.favorite.DbFavorites;
 import com.myguardianreader.articles.favorite.SharedPreferencesFavorite;
 import com.myguardianreader.common.Event;
+import com.myguardianreader.details.DetailsActivity;
 import com.reader.android.articles.model.Article;
 import com.reader.android.articles.model.Header;
 import com.reader.android.articles.model.Item;
@@ -43,6 +45,7 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.articlesActivity = articlesActivity;
         this.dbFavorites = dbFavorites;
+        articlesActivity.setSupportActionBar(toolbar);
         adapter = new ArticleAdapter(articlesActivity, onClickArticle);
         recyclerView.setAdapter(adapter);
     }
@@ -175,6 +178,13 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
             indexFiltredArticle = 0;
         }
         return indexFiltredArticle;
+    }
+
+    @Override
+    public void openArticleDetailActivity(Article article) {
+        Intent intent = new Intent(articlesActivity, DetailsActivity.class);
+        intent.putExtra("article", article);
+        articlesActivity.startActivity(intent);
     }
 
 }
