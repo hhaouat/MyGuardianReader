@@ -1,4 +1,4 @@
-package com.myguardianreader.db;
+package com.myguardianreader.repository.local;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

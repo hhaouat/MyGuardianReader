@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.myguardianreader.common.BasePresenter;
 import com.myguardianreader.common.BasePresenterView;
+import com.myguardianreader.repository.GuardianRepository;
+import com.myguardianreader.repository.remote.GuardianService;
 import com.reader.android.articles.model.Article;
 
 import java.util.List;
@@ -13,15 +15,13 @@ import io.reactivex.Scheduler;
 
 class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
     private final Scheduler uiScheduler;
-    private final Scheduler ioScheduler;
-    private final ArticlesRepository articlesRepository;
+    private final GuardianRepository guardianRepository;
 
     private static final String TAG = ArticlesPresenter.class.getName();
 
-    ArticlesPresenter(Scheduler uiScheduler, Scheduler ioScheduler, ArticlesRepository articlesRepository) {
+    ArticlesPresenter(Scheduler uiScheduler, GuardianRepository guardianRepository) {
         this.uiScheduler = uiScheduler;
-        this.ioScheduler = ioScheduler;
-        this.articlesRepository = articlesRepository;
+        this.guardianRepository = guardianRepository;
     }
 
     @Override
@@ -34,7 +34,7 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
     void loadArticles(View view) {
         addToUnsubscribe(view.onRefreshAction()
                 .doOnNext(ignored -> view.showRefreshing(true))
-                .switchMapSingle(ignored -> articlesRepository.latestFintechArticles().subscribeOn(ioScheduler))
+                .switchMapSingle(ignored -> guardianRepository.getFintechArticlesList())
                 .observeOn(uiScheduler)
                 .subscribe(
                         articles -> {
@@ -48,6 +48,7 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
                             view.showRefreshing(false);}));
 
     }
+
 
     private void onArticleClicked(View view) {
         addToUnsubscribe(view.onArticleClicked()

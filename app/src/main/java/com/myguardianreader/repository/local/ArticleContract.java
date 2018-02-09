@@ -1,4 +1,4 @@
-package com.myguardianreader.db;
+package com.myguardianreader.repository.local;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;

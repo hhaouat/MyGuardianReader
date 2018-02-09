@@ -1,4 +1,4 @@
-package com.myguardianreader.db;
+package com.myguardianreader.repository.local;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

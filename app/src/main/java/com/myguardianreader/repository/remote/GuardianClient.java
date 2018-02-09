@@ -1,4 +1,4 @@
-package com.myguardianreader.common;
+package com.myguardianreader.repository.remote;
 
 import com.reader.android.api.model.ApiArticleListResponse;
 import com.reader.android.api.model.ApiArticleResponse;
@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
-public interface GuardianService {
+public interface GuardianClient {
     @GET("search?show-fields=headline,thumbnail&page-size=50")
     Single<ApiArticleListResponse> searchArticles(@Query("q") String searchTerm);
 

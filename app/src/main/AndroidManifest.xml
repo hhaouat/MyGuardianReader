@@ -21,7 +21,7 @@
         </activity>
         <activity android:name="com.myguardianreader.details.DetailsActivity"/>
         <provider
-            android:name="com.myguardianreader.db.RequestProvider"
+            android:name="com.myguardianreader.repository.local.RequestProvider"
             android:authorities="com.reader.android"
             android:exported="false"
             android:syncable="true"/>

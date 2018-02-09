@@ -1,14 +1,16 @@
 package com.myguardianreader.articles;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 
 import com.google.gson.Gson;
 import com.myguardianreader.BuildConfig;
+import com.myguardianreader.articles.favorite.DbFavorites;
 import com.myguardianreader.articles.model.ArticleApiMapper;
 import com.myguardianreader.articles.model.ArticleMapper;
-import com.myguardianreader.common.GuardianService;
+import com.myguardianreader.repository.GuardianRepository;
+import com.myguardianreader.repository.remote.GuardianService;
+import com.myguardianreader.repository.remote.GuardianClient;
 import com.myguardianreader.details.DetailsPresenter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -27,23 +29,26 @@ public class ArticlesModule {
     private static final String HEADER_API_KEY = "api-key";
 
     ArticlesPresenter inject(Context context) {
-        return new ArticlesPresenter(AndroidSchedulers.mainThread(), Schedulers.io(),
-                new ArticlesRepository(createGuardianService(context), new ArticleMapper(), new ArticleApiMapper()));
+        return new ArticlesPresenter(AndroidSchedulers.mainThread(),
+                new GuardianRepository(
+                        new GuardianService(
+                                createGuardianService(context),
+                                new ArticleMapper(), new ArticleApiMapper()), Schedulers.io(), new DbFavorites(context)));
     }
 
     public DetailsPresenter injectDetails(Context context) {
         return new DetailsPresenter(AndroidSchedulers.mainThread(), Schedulers.io(),
-                new ArticlesRepository(createGuardianService(context), new ArticleMapper(), new ArticleApiMapper()));
+                new GuardianService(createGuardianService(context), new ArticleMapper(), new ArticleApiMapper()));
     }
 
-    private GuardianService createGuardianService(Context context) {
+    private GuardianClient createGuardianService(Context context) {
         return new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(new Gson()))
                 .client(createOkHttpClient(context.getResources()))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
-                .create(GuardianService.class);
+                .create(GuardianClient.class);
     }
 
     private OkHttpClient createOkHttpClient(Resources resources) {

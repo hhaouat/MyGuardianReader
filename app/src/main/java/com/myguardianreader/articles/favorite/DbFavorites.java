@@ -3,7 +3,7 @@ package com.myguardianreader.articles.favorite;
 import android.content.Context;
 
 import com.myguardianreader.api.model.Favorite;
-import com.myguardianreader.db.ArticleDbRepository;
+import com.myguardianreader.repository.local.ArticleDbRepository;
 import com.reader.android.articles.model.Article;
 
 import java.util.List;

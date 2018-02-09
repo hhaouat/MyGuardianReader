@@ -2,7 +2,7 @@ package com.myguardianreader.details;
 
 import android.util.Log;
 
-import com.myguardianreader.articles.ArticlesRepository;
+import com.myguardianreader.repository.remote.GuardianService;
 import com.myguardianreader.common.BasePresenter;
 import com.myguardianreader.common.BasePresenterView;
 import com.reader.android.api.model.ApiArticleContent;
@@ -15,14 +15,14 @@ import io.reactivex.Scheduler;
 public class DetailsPresenter extends BasePresenter<DetailsPresenter.View> {
     private final Scheduler uiScheduler;
     private final Scheduler ioScheduler;
-    private final ArticlesRepository articlesRepository;
+    private final GuardianService guardianRepository;
 
     private static final String TAG = "DetailsPresenter";
 
-    public DetailsPresenter(Scheduler uiScheduler, Scheduler ioScheduler, ArticlesRepository articlesRepository) {
+    public DetailsPresenter(Scheduler uiScheduler, Scheduler ioScheduler, GuardianService guardianRepository) {
         this.uiScheduler = uiScheduler;
         this.ioScheduler = ioScheduler;
-        this.articlesRepository = articlesRepository;
+        this.guardianRepository = guardianRepository;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class DetailsPresenter extends BasePresenter<DetailsPresenter.View> {
         });
 
         addToUnsubscribe(apiArticleFieldsObservable
-                .switchMapSingle(ignored -> articlesRepository.getArticle(url).subscribeOn(ioScheduler))
+                .switchMapSingle(ignored -> guardianRepository.getArticle(url).subscribeOn(ioScheduler))
                 .observeOn(uiScheduler)
                 .subscribe(
                         apiArticleContent -> {
