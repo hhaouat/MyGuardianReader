@@ -1,11 +1,15 @@
 package com.myguardianreader.details;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,18 +31,18 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DetailsDisplayer implements DetailsPresenter.View {
+public class DetailFragment extends Fragment implements DetailsPresenter.View{
 
-    private final DetailsActivity detailsActivity;
-    private final DbFavorites dbFavorites;
-    private View.OnClickListener listener;
-    private FavoriteState favoriteState;
+    private DetailsPresenter detailsPresenter;
+    private String articleUrl;
+    private DbFavorites dbFavorites;
     private ProgressDialog progressDialog;
-
+    private FavoriteState favoriteState;
+    private View.OnClickListener listener;
     private SharedPreferencesFavorite sharedPreferencesFavorite;
     private Article article;
 
-    private static final String TAG = "DetailsDisplayer";
+    private static final String TAG = "DetailFragment";
 
     @BindView(R.id.detail_thumbnail)
     ImageView thumbnail;
@@ -55,28 +59,64 @@ public class DetailsDisplayer implements DetailsPresenter.View {
     @BindView(R.id.favouriteIndicator)
     ImageView favoriteIndicator;
 
-    public DetailsDisplayer(DetailsActivity detailsActivity, Intent intent, DbFavorites dbFavorites) {
-        this.detailsActivity = detailsActivity;
-        this.dbFavorites = dbFavorites;
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        dbFavorites = new DbFavorites(getActivity());
 
-        detailsActivity.setContentView(R.layout.activity_detail);
-        ButterKnife.bind(this, detailsActivity);
+        ButterKnife.bind(this, view);
 
-        sharedPreferencesFavorite = HeadlinesApp.getSharedPreferences(detailsActivity);
+        detailsPresenter = HeadlinesApp.from(getActivity().getApplicationContext()).injectDetails(getActivity());
+
+        sharedPreferencesFavorite = HeadlinesApp.getSharedPreferences(getActivity());
 
         displayProgressDialog();
 
-        article = intent.getParcelableExtra("article");
+        Bundle args = getArguments();
+        article = args.getParcelable("article");
+        articleUrl = article.getUrl();
 
-        Glide.with(this.detailsActivity).load(article.getThumbnail()).into(thumbnail);
+        Glide.with(this.getActivity()).load(article.getThumbnail()).into(thumbnail);
         title.setText(article.getTitle());
 
         displayDate(date, article.getPublished());
-        displayFavorite(detailsActivity, favoriteIndicator);
+        displayFavorite(favoriteIndicator);
+
+        return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Bundle args = getArguments();
+        if (args != null) {
+            article = args.getParcelable("article");
+            articleUrl = article.getUrl();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        detailsPresenter.register(this, articleUrl);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        dbFavorites.closeConnection();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        detailsPresenter.unregister();
     }
 
     private void displayProgressDialog() {
-        progressDialog = new ProgressDialog(detailsActivity);
+        progressDialog = new ProgressDialog(getActivity());
         progressDialog.setMessage("Loading");
         progressDialog.show();
     }
@@ -88,10 +128,10 @@ public class DetailsDisplayer implements DetailsPresenter.View {
         date.setText(dateFormat.format(dateArticlePublished));
     }
 
-    private void displayFavorite(DetailsActivity detailsActivity, ImageView favoriteIndicator) {
+    private void displayFavorite(ImageView favoriteIndicator) {
         favoriteState = new FavoriteState();
 
-        favoriteIndicator.setImageDrawable(detailsActivity.getDrawable(isFavorite() == true ? R.mipmap.ic_favorite_white : R.mipmap.ic_favorite_border_white));
+        favoriteIndicator.setImageDrawable(getActivity().getDrawable(isFavorite() == true ? R.mipmap.ic_favorite_white : R.mipmap.ic_favorite_border_white));
 
         listener = new View.OnClickListener() {
             @Override
@@ -107,7 +147,7 @@ public class DetailsDisplayer implements DetailsPresenter.View {
                     sharedPreferencesFavorite.setFavorite(article.getId());
                     dbFavorites.storeFavorite(article);
                 }
-                favoriteIndicator.setImageDrawable(getFavoriteDrawable(detailsActivity, favoriteState.getStatus()));
+                favoriteIndicator.setImageDrawable(getFavoriteDrawable(favoriteState.getStatus()));
             }
         };
         favoriteIndicator.setOnClickListener(listener);
@@ -117,8 +157,8 @@ public class DetailsDisplayer implements DetailsPresenter.View {
         return article.getFavorite();
     }
 
-    private Drawable getFavoriteDrawable(DetailsActivity detailsActivity, FavoriteStatus favoriteStatus) {
-        return detailsActivity.getDrawable(favoriteStatus == FavoriteStatus.FAVOURITE ?
+    private Drawable getFavoriteDrawable(FavoriteStatus favoriteStatus) {
+        return getActivity().getDrawable(favoriteStatus == FavoriteStatus.FAVOURITE ?
                 R.mipmap.ic_favorite_white : R.mipmap.ic_favorite_border_white);
     }
 
@@ -131,7 +171,7 @@ public class DetailsDisplayer implements DetailsPresenter.View {
 
     @Override
     public void displayMessage(String errorMessage) {
-        Toast.makeText(detailsActivity, errorMessage, Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -140,5 +180,4 @@ public class DetailsDisplayer implements DetailsPresenter.View {
             progressDialog.dismiss();
         }
     }
-
 }
