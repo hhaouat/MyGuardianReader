@@ -30,7 +30,8 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
     private static final String TAG = "ArticlesDisplayer";
     private final Toolbar toolbar;
     private final SwipeRefreshLayout swipeRefreshLayout;
-    private final DbFavorites dbFavorites;
+    private DbFavorites dbFavorites;
+
     private ArticleAdapter adapter;
     ArticlesActivity articlesActivity;
     private PublishSubject<Article> onClickArticle = PublishSubject.create();
@@ -38,13 +39,12 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
     public ArticlesDisplayer(ArticlesActivity articlesActivity,
                              RecyclerView recyclerView,
                              SwipeRefreshLayout swipeRefreshLayout,
-                             Toolbar toolbar,
-                             DbFavorites dbFavorites) {
+                             Toolbar toolbar) {
 
         this.toolbar = toolbar;
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.articlesActivity = articlesActivity;
-        this.dbFavorites = dbFavorites;
+        dbFavorites = new DbFavorites(articlesActivity);
         articlesActivity.setSupportActionBar(toolbar);
         adapter = new ArticleAdapter(articlesActivity, onClickArticle);
         recyclerView.setAdapter(adapter);
@@ -187,4 +187,7 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
         articlesActivity.startActivity(intent);
     }
 
+    public void closeConnection() {
+        dbFavorites.closeConnection();
+    }
 }
