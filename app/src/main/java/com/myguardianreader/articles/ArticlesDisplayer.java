@@ -40,7 +40,6 @@ class ArticlesDisplayer implements ArticlesPresenter.View {
                              RecyclerView recyclerView,
                              SwipeRefreshLayout swipeRefreshLayout,
                              Toolbar toolbar) {
-
         this.toolbar = toolbar;
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.articlesActivity = articlesActivity;
