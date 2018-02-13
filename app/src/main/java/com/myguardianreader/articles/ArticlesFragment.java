@@ -16,6 +16,7 @@ import com.myguardianreader.HeadlinesApp;
 import com.myguardianreader.R;
 import com.myguardianreader.articles.favorite.DbFavorites;
 import com.myguardianreader.articles.favorite.SharedPreferencesFavorite;
+import com.myguardianreader.articles.model.ArticlesFilter;
 import com.myguardianreader.common.Event;
 import com.myguardianreader.details.DetailFragment;
 import com.reader.android.articles.model.Article;
@@ -47,8 +48,9 @@ public class ArticlesFragment extends Fragment implements ArticlesPresenter.View
 
     private ArticlesPresenter presenter;
     private ArticleAdapter adapter;
-    private DbFavorites dbFavorites;
+
     private PublishSubject<Article> onClickArticle = PublishSubject.create();
+    private ArticlesFilter articlesFilter;
 
     @Nullable
     @Override
@@ -56,15 +58,13 @@ public class ArticlesFragment extends Fragment implements ArticlesPresenter.View
         View view = inflater.inflate(R.layout.fragment_articles_list, container, false);
 
         ButterKnife.bind(this, view);
-        //recyclerView = (RecyclerView) view.findViewById(R.id.articles_recyclerview);
-        //swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.articles_swiperefreshlayout);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //getActivity().setSupportActionBar(toolbar);
 
         presenter = HeadlinesApp.from(getActivity().getApplicationContext()).inject(this.getActivity());
 
-        dbFavorites = new DbFavorites(this.getActivity());
+        articlesFilter = new ArticlesFilter(presenter.getDBfavorites());
 
         adapter = new ArticleAdapter(this.getActivity(), onClickArticle);
         recyclerView.setAdapter(adapter);
@@ -87,7 +87,7 @@ public class ArticlesFragment extends Fragment implements ArticlesPresenter.View
     @Override
     public void onDestroy() {
         super.onDestroy();
-        dbFavorites.closeConnection();
+        articlesFilter.closeConnection();
     }
 
     @Override
@@ -97,103 +97,11 @@ public class ArticlesFragment extends Fragment implements ArticlesPresenter.View
 
     @Override
     public void displayArticles(List<Article> articles) {
-        List<Article> favoriteArticle = setFavorite();
-        List<Item> itemList = createChronologicalList(articles, favoriteArticle);
+        List<Article> favoriteArticle = articlesFilter.setFavorite();
+        List<Item> itemList = articlesFilter.createChronologicalList(articles, favoriteArticle);
 
         adapter.showArticles(itemList);
         adapter.notifyDataSetChanged();
-    }
-
-    private List<Article> setFavorite(){
-
-        SharedPreferencesFavorite sharedPreferencesFavorite = HeadlinesApp.getSharedPreferences(getActivity());
-        Set<String> favoriteSet = sharedPreferencesFavorite.getFavoriteSet();
-
-        if (dbFavorites.getFavoriteArticle().isEmpty()){
-            return new ArrayList<>();
-        }
-        else{
-            List<Article> articleList = dbFavorites.getFavoriteArticle();
-            return articleList;
-        }
-    }
-
-    private List<Item> createChronologicalList(List<Article> articles, List<Article> favoriteArticleGroup) {
-        List<Article> currentWeekGroup = new ArrayList<>();
-        List<Article> lastWeekGroup = new ArrayList<>();
-
-        createGroups(articles, favoriteArticleGroup, currentWeekGroup, lastWeekGroup);
-
-        return groupSubListsInOne(favoriteArticleGroup, currentWeekGroup, lastWeekGroup);
-    }
-
-    private void createGroups(List<Article> articles, List<Article> favoriteArticleGroup,
-                              List<Article> currentWeekGroup, List<Article> lastWeekGroup) {
-        Calendar currentCalendar = Calendar.getInstance();
-        Calendar itemCalendar    = Calendar.getInstance();
-        Calendar lastWeekCalendar = getLastWeekCalendar();
-
-        sortListArticlesByDate(articles);
-
-        for (Article article : articles) {
-
-            if (favoriteArticleGroup.contains(article))
-                continue;
-
-            itemCalendar.setTime(new Date(article.getPublished()));
-
-            if (isArticleBelongingToTheWeekCalendar(itemCalendar, currentCalendar)){
-                currentWeekGroup.add(article);
-            } else {
-                if(isArticleBelongingToTheWeekCalendar(itemCalendar, lastWeekCalendar))
-                    lastWeekGroup.add(article);
-            }
-        }
-    }
-
-    private void sortListArticlesByDate(List<Article> articles) {
-        Collections.sort(articles);
-    }
-
-    private boolean isArticleBelongingToTheWeekCalendar(Calendar itemCalendar, Calendar weekCalendar) {
-        return itemCalendar.get(itemCalendar.WEEK_OF_YEAR) == weekCalendar.get(weekCalendar.WEEK_OF_YEAR) ? true : false;
-    }
-    private List<Item> groupSubListsInOne(List<Article> favoriteArticle,
-                                          List<Article> currentWeekList,
-                                          List<Article> lastWeekList) {
-
-        List<Item> filtredArticle = new ArrayList<>();
-        int indexFiltredArticle = 0;
-
-        indexFiltredArticle = addFavoriteToListIfExist(filtredArticle, favoriteArticle);
-
-        filtredArticle.add(indexFiltredArticle, new Header("This week"));
-        filtredArticle.addAll(currentWeekList);
-        filtredArticle.add(new Header("Last week"));
-        filtredArticle.addAll(lastWeekList);
-        return filtredArticle;
-    }
-
-    private int addFavoriteToListIfExist(List<Item> filtredArticle, List<Article> favoriteArticle) {
-        int indexFiltredArticle;
-        if (favoriteArticle.size() != 0) {
-            filtredArticle.add(0, new Header("Favorite"));
-            filtredArticle.addAll(favoriteArticle);
-            indexFiltredArticle = favoriteArticle.size() + 1;
-        }
-        else{
-            indexFiltredArticle = 0;
-        }
-        return indexFiltredArticle;
-    }
-
-    private Calendar getLastWeekCalendar() {
-        Calendar lastWeekCalendar = Calendar.getInstance();
-
-        int i = lastWeekCalendar.get(Calendar.DAY_OF_WEEK) - lastWeekCalendar.getFirstDayOfWeek();
-        lastWeekCalendar.add(Calendar.DATE, -i - 7);
-
-        return lastWeekCalendar;
     }
 
     @Override

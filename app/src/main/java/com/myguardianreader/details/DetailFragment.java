@@ -121,7 +121,6 @@ public class DetailFragment extends Fragment implements DetailsPresenter.View{
         progressDialog.show();
     }
 
-
     private void displayDate(TextView date, Long articlePublished) {
         Date dateArticlePublished = new Date(articlePublished);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY");

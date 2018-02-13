@@ -2,10 +2,10 @@ package com.myguardianreader.articles;
 
 import android.util.Log;
 
+import com.myguardianreader.articles.favorite.DbFavorites;
 import com.myguardianreader.common.BasePresenter;
 import com.myguardianreader.common.BasePresenterView;
 import com.myguardianreader.repository.GuardianRepository;
-import com.myguardianreader.repository.remote.GuardianService;
 import com.reader.android.articles.model.Article;
 
 import java.util.List;
@@ -49,7 +49,6 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
 
     }
 
-
     private void onArticleClicked(View view) {
         addToUnsubscribe(view.onArticleClicked()
                 .subscribe(
@@ -58,6 +57,9 @@ class ArticlesPresenter extends BasePresenter<ArticlesPresenter.View> {
                             Log.e(TAG,"Error onArticleClicked");
                             view.displayMessage("An error occurs while loading the data, please try again.");}));
 
+    }
+    public DbFavorites getDBfavorites(){
+        return guardianRepository.getFavorites();
     }
 
     interface View extends BasePresenterView {

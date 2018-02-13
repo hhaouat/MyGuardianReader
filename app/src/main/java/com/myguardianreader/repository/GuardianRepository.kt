@@ -10,7 +10,8 @@ class GuardianRepository(private val guardianService: GuardianService,
                          private val ioScheduler: Scheduler,
                          private val dbFavorites: DbFavorites) {
 
-    fun getFintechArticlesList(): Single<List<Article>> {
-        return guardianService.latestFintechArticles().subscribeOn(ioScheduler)
-    }
+    fun getFintechArticlesList(): Single<List<Article>> = guardianService.latestFintechArticles().subscribeOn(ioScheduler)
+
+    fun getFavorites(): DbFavorites = dbFavorites
+
 }
